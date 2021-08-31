@@ -1,4 +1,5 @@
 # coding: utf-8
+# 無作為抽出の場合の直交表(乱塊法ではない)
 import pandas as pd
 import numpy as np
 import pdb
