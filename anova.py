@@ -246,16 +246,16 @@ def multiple_comparison_bonferroni(data, V_E, label="A"):
             print(" {}{} and {}{} don't have a significant difference.".format(label,u+1,label,v+1))
         else:
             if T[i] < T0_001:
-                print(" {}{} and {}{} have a significant difference (p={}).".format(label,u+1,label,v+1,pvalue_005))
+                print(colored(" {}{} and {}{} have a significant difference (p={}).".format(label,u+1,label,v+1,pvalue_005),"yellow"))
             else:
-                print(" {}{} and {}{} have a significant difference (p={}).".format(label,u+1,label,v+1,pvalue_001))
+                print(colored(" {}{} and {}{} have a significant difference (p={}).".format(label,u+1,label,v+1,pvalue_001),"yellow"))
 
 
 def check_normality(df, pvalue):
     if scipy.stats.shapiro(df.value).pvalue < pvalue:
-        print("The given data doesn't comply with the normal distribution.")
-        print("Thus the multiple comparison test cannot be applied.")
-        print("Use a non-parametric multiple comparison test instead.")
+        print(colored("The given data doesn't comply with the normal distribution.","yellow"))
+        print(colored("Thus the multiple comparison test cannot be applied.","yellow"))
+        print(colored("Use a non-parametric multiple comparison test instead.","yellow"))
         return False 
     else:
         return True
