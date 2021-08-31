@@ -208,15 +208,43 @@ def two_way_anova(df):
     #prinfo(V_A, V_B, V_AB, V_E)
     #prinfo(F_A, F_B, F_AB)
 
+
+def check_normality(df, pvalue):
+    if scipy.stats.shapiro(df["A"]).pvalue < pvalue:
+        print("The given data doesn't comply with the normal distribution.")
+        print("Thus the multiple comparison test cannot be applied.")
+        print("Use a non-parametric multiple comparison test instead.")
+        return False 
+    else:
+        return True
+
+def check_homoscedasticity(df, pvalue):
+    nA = max(df["A"])
+    valueA = [df[df["A"]==i].value.tolist() for i in range(1,nA+1)]
+    pdb.set_trace()
+    if scipy.stats.bartlett(*valueA).pvalue < pvalue:
+        print("The given data doesn't comply with the homoscedasticity.")
+        print("Thus the multiple comparison test cannot be applied.")
+        print("Apply 1) Non-parametric test, 2) Kruskal-Wallis test,")
+        print("and finally 3) Non-parametric multiple comparison test.")
+        return False
+    else:
+        return True
+
 if __name__=="__main__":
     if len(sys.argv)!=2:
         print("Usage: $ python anova.py <CSV_FILE.csv>")
         exit()
     csv = str(sys.argv[1])
     df = pd.read_csv(csv)
+    
+    if not check_normality(df, pvalue=0.01):
+        exit()
+    if not check_homoscedasticity(df, pvalue=0.05):
+        exit()
+
     if "B" in df.keys():
         two_way_anova(df)
     else:
         one_way_anova(df)
-
 
