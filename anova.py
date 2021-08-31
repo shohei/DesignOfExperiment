@@ -210,7 +210,7 @@ def two_way_anova(df):
 
 if __name__=="__main__":
     if len(sys.argv)!=2:
-        print("Usage: $ python two_way_anova.py <CSV_FILE.csv>")
+        print("Usage: $ python anova.py <CSV_FILE.csv>")
         exit()
     csv = str(sys.argv[1])
     df = pd.read_csv(csv)
