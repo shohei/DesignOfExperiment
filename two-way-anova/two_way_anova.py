@@ -3,17 +3,23 @@ import numpy as np
 import scipy.stats
 import pdb
 import sys
+import inspect
+import re
 
 def flatten(t):
     if not type(t)==type([]): #t is numpy array 
         t = t.tolist()
     return [item for sublist in t for item in sublist]
 
-if __name__=="__main__":
-    if len(sys.argv)!=2:
-        print("Usage: $ python two_way_anova.py <CSV_FILE.csv>")
-        exit()
-    csv = str(sys.argv[1])
+def prinfo(*args):
+    frame = inspect.currentframe().f_back
+    s = inspect.getframeinfo(frame).code_context[0]
+    r = re.search(r"\((.*)\)", s).group(1)
+    vnames = r.split(", ")
+    for i,(var,val) in enumerate(zip(vnames, args)):
+        print(f"{var} = {val}")
+
+def two_way_anova(csv):
     df = pd.read_csv(csv)
     nA = max(df["A"])
     nB = max(df["B"])
@@ -21,11 +27,23 @@ if __name__=="__main__":
     for i in range(nA):
         data.append(([[]]*nB))
     
+    has_no_repetition = True 
     for i in range(nA):
         for j in range(nB):
             _df = df[df["A"]==(i+1)][df["B"]==(j+1)]
             data[i][j] = _df.value.tolist()
-    
+            if len(data[i][j])==0:
+                print("Cannot run ANOVA since no data found for A{},B{}",i+1,j+1)
+                exit()
+            if len(data[i][j])>1:
+                has_no_repetition = False
+
+    # Ignore interaction if each data has only one sample 
+    if has_no_repetition:
+        ignore_interaction = True
+    else:
+        ignore_interaction = False
+
     flatten_data = flatten(flatten(data))
     N = len(flatten_data)
     mu = sum(flatten_data)/N
@@ -69,6 +87,8 @@ if __name__=="__main__":
     S_AB = S_AB - S_A - S_B
     
     # S_E: Sum of squares of deviation for erros
+    if ignore_interaction:
+        S_AB = 0
     S_E = S - S_A - S_B - S_AB
     
     # Degree of freedom
@@ -77,6 +97,8 @@ if __name__=="__main__":
     f_B = nB - 1
     f_AB = (nA-1)*(nB-1)
     f_E = N - nA*nB
+    if ignore_interaction:
+        f_E = (nA-1)*(nB-1)
     
     # Invariant variance
     V_A = S_A/f_A
@@ -90,9 +112,10 @@ if __name__=="__main__":
     F_AB = V_AB/V_E
     
     # Caluculation of F distribution
-    print("****************")
-    print("Result of ANOVA")
-    print("****************")
+    print("********************************")
+    print("Result of ANOVA:",csv)
+    print("********************************")
+
     if F_A > scipy.stats.f.isf(0.05, f_A, f_E):
         if F_A > scipy.stats.f.isf(0.01, f_A, f_E):
            print("Significant difference among A (p=0.01)")
@@ -109,21 +132,26 @@ if __name__=="__main__":
     else:
            print("No significant difference among B")
     
-    if F_AB > scipy.stats.f.isf(0.05, f_AB, f_E):
-        if F_AB > scipy.stats.f.isf(0.01, f_AB, f_E):
-           print("Significant difference among interaction AxB (p=0.01)")
-        else:
-           print("Significant difference among interaction AxB (p=0.05)")
+    if ignore_interaction:
+        print("*The interaction AxB is ignored for this input data*")
     else:
-           print("No significant difference among interaction AxB")
+        if F_AB > scipy.stats.f.isf(0.05, f_AB, f_E):
+            if F_AB > scipy.stats.f.isf(0.01, f_AB, f_E):
+               print("Significant difference among interaction AxB (p=0.01)")
+            else:
+               print("Significant difference among interaction AxB (p=0.05)")
+        else:
+               print("No significant difference among interaction AxB")
    
-    print(S, S_A, S_B, S_AB, S_E)
-    print(f,f_A,f_B,f_AB,f_E) 
-    print(V_A,V_B,V_AB,V_E)
-    print(F_A,F_B,F_AB)
+    #prinfo(N, nA, nB)
+    #prinfo(S, S_A, S_B, S_AB, S_E)
+    #prinfo(f, f_A, f_B, f_AB, f_E) 
+    #prinfo(V_A, V_B, V_AB, V_E)
+    #prinfo(F_A, F_B, F_AB)
 
-
-
-
-
-
+if __name__=="__main__":
+    if len(sys.argv)!=2:
+        print("Usage: $ python two_way_anova.py <CSV_FILE.csv>")
+        exit()
+    csv = str(sys.argv[1])
+    two_way_anova(csv)
