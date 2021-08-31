@@ -62,7 +62,7 @@ if __name__=="__main__":
         for j in range(nB):
             d = data[i][j]
             if not type(d)==type([]): #d is numpy array 
-                d = t.tolist()
+                d = d.tolist()
             n_ab = len(d)
             mean_ab = sum(d)/n_ab
             S_AB += n_ab*(mean_ab-mu)**2
