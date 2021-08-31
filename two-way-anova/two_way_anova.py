@@ -5,6 +5,8 @@ import pdb
 import sys
 
 def flatten(t):
+    if not type(t)==type([]): #t is numpy array 
+        t = t.tolist()
     return [item for sublist in t for item in sublist]
 
 if __name__=="__main__":
@@ -42,7 +44,7 @@ if __name__=="__main__":
     # S_A: Sum of squares of deviation for factor A
     S_A = 0
     for i in range(nA):
-        d = flatten(data[i,:].tolist())
+        d = flatten(data[i,:])
         n_a = len(d)
         mean_a = sum(d)/n_a
         S_A += n_a * (mean_a-mu)**2
@@ -50,7 +52,7 @@ if __name__=="__main__":
     # S_B: Sum of squares of deviation for factor B
     S_B = 0
     for j in range(nB):
-        d = flatten(data[:,j].tolist())
+        d = flatten(data[:,j])
         n_b = len(d)
         mean_b = sum(d)/n_b
         S_B += n_b * (mean_b-mu)**2
@@ -59,7 +61,9 @@ if __name__=="__main__":
     S_AB = 0
     for i in range(nA):
         for j in range(nB):
-            d = data[i][j].tolist()
+            d = data[i][j]
+            if not type(d)==type([]): #d is numpy array 
+                d = t.tolist()
             n_ab = len(d)
             mean_ab = sum(d)/n_ab
             S_AB += n_ab*(mean_ab-mu)**2
@@ -113,4 +117,9 @@ if __name__=="__main__":
            print("Significant difference among interaction AxB (p=0.05)")
     else:
            print("No significant difference among interaction AxB")
-    
+   
+    #print(S, S_A, S_B, S_AB, S_E)
+    #print(f,f_A,f_B,f_AB,f_E) 
+    #print(V_A,V_B,V_AB,V_E)
+    #print(F_A,F_B,F_AB)
+
