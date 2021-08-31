@@ -7,6 +7,7 @@ import inspect
 import re
 from itertools import combinations
 import math
+from termcolor import colored
 
 def flatten(t):
     if not type(t)==type([]): #t is numpy array 
@@ -75,7 +76,7 @@ def one_way_anova(df):
 
     if F_A > scipy.stats.f.isf(0.05, f_A, f_E):
         if F_A > scipy.stats.f.isf(0.01, f_A, f_E):
-           print("Significant difference among A (p=0.01)")
+           print(colored("Significant difference among A (p=0.01)","red"))
         else:
            print("Significant difference among A (p=0.05)")
         multiple_comparison_bonferroni(data, V_E, pvalue=0.05)
@@ -180,9 +181,9 @@ def two_way_anova(df):
 
     if F_A > scipy.stats.f.isf(0.05, f_A, f_E):
         if F_A > scipy.stats.f.isf(0.01, f_A, f_E):
-           print("Significant difference among A (p=0.01)")
+           print(colored("Significant difference among A (p=0.01)","red"))
         else:
-           print("Significant difference among A (p=0.05)")
+           print(colored("Significant difference among A (p=0.05)","red"))
         data_A = [flatten(data[i,:]) for i in range(nA)]
         multiple_comparison_bonferroni(data_A, V_E, 0.05, label="A")
     else:
@@ -190,22 +191,22 @@ def two_way_anova(df):
     
     if F_B > scipy.stats.f.isf(0.05, f_B, f_E):
         if F_B > scipy.stats.f.isf(0.01, f_B, f_E):
-           print("Significant difference among B (p=0.01)")
+           print(colored("Significant difference among B (p=0.01)","red"))
         else:
-           print("Significant difference among B (p=0.05)")
+           print(colored("Significant difference among B (p=0.05)","red"))
         data_B = [flatten(data[:,j]) for j in range(nB)]
         multiple_comparison_bonferroni(data_B, V_E, 0.05, label="B")
     else:
            print("No significant difference among B")
 
     if ignore_interaction:
-        print("*The interaction AxB is ignored for this input data*")
+        print(colored("*The interaction AxB is ignored for this input data*","green"))
     else:
         if F_AB > scipy.stats.f.isf(0.05, f_AB, f_E):
             if F_AB > scipy.stats.f.isf(0.01, f_AB, f_E):
-               print("Significant difference among interaction AxB (p=0.01)")
+               print(colored("Significant difference among interaction AxB (p=0.01)","red"))
             else:
-               print("Significant difference among interaction AxB (p=0.05)")
+               print(colored("Significant difference among interaction AxB (p=0.05)","red"))
         else:
                print("No significant difference among interaction AxB")
    
@@ -311,7 +312,7 @@ def check_homoscedasticity_one_way(df, pvalue):
     nA = max(df["A"])
     valueA = [df[df["A"]==i].value.tolist() for i in range(1,nA+1)]
     if scipy.stats.bartlett(*valueA).pvalue < pvalue:
-        print("The given data doesn't comply with the homoscedasticity.")
+        print(colored("The given data doesn't comply with the homoscedasticity.","yellow"))
         print("Thus the multiple comparison test cannot be applied.")
         print("Apply 1) Non-parametric test, 2) Kruskal-Wallis test,")
         print("and finally 3) Non-parametric multiple comparison test.")
@@ -326,13 +327,13 @@ def check_homoscedasticity_two_way(df, pvalue):
     valueB = [df[df["B"]==i].value.tolist() for i in range(1,nB+1)]
     isHomoscedasticity = True
     if scipy.stats.bartlett(*valueA).pvalue < pvalue:
-        print("The cateogry A doesn't comply with the homoscedasticity.")
+        print(colored("The cateogry A doesn't comply with the homoscedasticity.","yellow"))
         print("Thus the multiple comparison test cannot be applied.")
         print("Apply 1) Non-parametric test, 2) Kruskal-Wallis test,")
         print("and finally 3) Non-parametric multiple comparison test.")
         isHomoscedasticity = False
     if scipy.stats.bartlett(*valueB).pvalue < pvalue:
-        print("The category B doesn't comply with the homoscedasticity.")
+        print(colored("The category B doesn't comply with the homoscedasticity.","yellow"))
         print("Thus the multiple comparison test cannot be applied.")
         print("Apply 1) Non-parametric test, 2) Kruskal-Wallis test,")
         print("and finally 3) Non-parametric multiple comparison test.")
@@ -348,14 +349,14 @@ if __name__=="__main__":
 
     if "B" in df.keys():
         # Two way ANOVA
-        print("Two way ANOVA")
+        print("Running two-way ANOVA")
         if not check_normality(df, pvalue=0.05) \
            or not check_homoscedasticity_two_way(df, pvalue=0.05):
             exit()
         two_way_anova(df)
     else:
         # One way ANOVA
-        print("One way ANOVA")
+        print("Running one-way ANOVA")
         if not check_normality(df, pvalue=0.05) \
            or not check_homoscedasticity_one_way(df, pvalue=0.05):
             exit()
