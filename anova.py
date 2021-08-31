@@ -178,11 +178,13 @@ def two_way_anova(df):
     print("Result of ANOVA:",csv)
     print("********************************")
 
+    isSignificant = False 
     if F_A > scipy.stats.f.isf(0.05, f_A, f_E):
         if F_A > scipy.stats.f.isf(0.01, f_A, f_E):
            print("Significant difference among A (p=0.01)")
         else:
            print("Significant difference among A (p=0.05)")
+        isSignificant = True 
     else:
            print("No significant difference among A")
     
@@ -191,9 +193,10 @@ def two_way_anova(df):
            print("Significant difference among B (p=0.01)")
         else:
            print("Significant difference among B (p=0.05)")
+        isSignificant = True 
     else:
            print("No significant difference among B")
-    
+
     if ignore_interaction:
         print("*The interaction AxB is ignored for this input data*")
     else:
@@ -205,6 +208,9 @@ def two_way_anova(df):
         else:
                print("No significant difference among interaction AxB")
    
+    if isSignificant:
+        multiple_comparison_bonferroni_two_way(data, V_E, 0.05)
+
     #prinfo(N, nA, nB)
     #prinfo(S, S_A, S_B, S_AB, S_E)
     #prinfo(f, f_A, f_B, f_AB, f_E) 
@@ -234,10 +240,65 @@ def multiple_comparison_bonferroni(data, V_E, pvalue):
         n_v = len(data[v])
         T[i] = abs(means[u]-means[v])/math.sqrt(V_E*(1/n_u+1/n_v))
         if T[i] < T0:
-            print(" A{} and A{} don't have a significant difference.".format(u,v))
+            print(" A{} and A{} don't have a significant difference.".format(u+1,v+1))
         else:
-            print(" A{} and A{} have a significant difference.".format(u,v))
+            print(" A{} and A{} have a significant difference.".format(u+1,v+1))
 
+def multiple_comparison_bonferroni_two_way(data, V_E, pvalue):
+    nA = data.shape[0] 
+    nB = data.shape[1]
+    flatten_data = flatten(flatten(data))
+    N = len(flatten_data)
+    mu = sum(flatten_data)/N
+
+    means_A = [[]]*nA
+    number_A = [[]]*nB
+    for i in range(nA):
+        di = flatten(data[i,:].tolist())
+        ni = len(di)
+        means_A[i] = sum(di)/ni
+        number_A[i] = ni
+
+    means_B = [[]]*nB
+    number_B = [[]]*nB
+    for j in range(nB):
+        dj = flatten(data[:,j].tolist())
+        nj = len(dj)
+        means_B[j] = sum(dj)/nj
+        number_B[j] = nj
+
+    pvalue_prime_A = pvalue / (nA*(nA-1)/2)  
+    pvalue_prime_B = pvalue / (nB*(nB-1)/2)  
+    f_prime_A = N - nA 
+    f_prime_B = N - nB 
+    # Critical value T0
+    # p-value is divided by 2 since TINV() function of Excel uses two-sided tail probability
+    # https://scipy-user.scipy.narkive.com/j7pH5qnd/how-does-scipy-stats-t-isf-work
+    T0_A = scipy.stats.t.isf(pvalue_prime_A/2, f_prime_A) 
+    T0_B = scipy.stats.t.isf(pvalue_prime_B/2, f_prime_B) 
+
+    combi_A =  [x for x in combinations(range(nA),2)]
+    T_A = [[]]*len(combi_A)
+    for i,(u,v) in enumerate(combi_A):
+        T_A[i] = abs(means_A[u]-means_A[v])/math.sqrt(V_E*(1/number_A[u]+1/number_A[v]))
+        if T_A[i] < T0_A:
+            print(" A{} and A{} don't have a significant difference.".format(u+1,v+1))
+        else:
+            print(" A{} and A{} have a significant difference.".format(u+1,v+1))
+
+    combi_B =  [x for x in combinations(range(nB),2)]
+    T_B = [[]]*len(combi_B)
+    for i,(u,v) in enumerate(combi_B):
+        T_B[i] = abs(means_B[u]-means_B[v])/math.sqrt(V_E*(1/number_B[u]+1/number_B[v]))
+        if T_A[i] < T0_A:
+            print(" B{} and B{} don't have a significant difference.".format(u+1,v+1))
+        else:
+            print(" B{} and B{} have a significant difference.".format(u+1,v+1))
+
+    #for t in T_A:
+    #    prinfo(t)
+    #for t in T_B:
+    #    prinfo(t)
 
 def check_normality(df, pvalue):
     if scipy.stats.shapiro(df.value).pvalue < pvalue:
