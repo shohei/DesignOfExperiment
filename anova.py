@@ -29,7 +29,7 @@ def one_way_anova(df):
         _df = df[df["A"]==(i+1)]
         data[i] = _df.value.tolist()
         if len(data[i])==0:
-            print("Cannot run ANOVA since no data found for A{},B{}",i+1,j+1)
+            print("Cannot run ANOVA since no data found for A{}",i+1)
             exit()
 
     flatten_data = flatten(data)
