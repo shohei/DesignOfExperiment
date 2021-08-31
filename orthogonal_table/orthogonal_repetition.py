@@ -1,3 +1,4 @@
+# coding: utf-8
 import pandas as pd
 import numpy as np
 import pdb
@@ -5,6 +6,11 @@ import scipy.stats
 import inspect
 import re
 import sys
+
+def flatten(t):
+    if not type(t)==type([]): #t is numpy array 
+        t = t.tolist()
+    return [item for sublist in t for item in sublist]
 
 def prinfo(*args):
     frame = inspect.currentframe().f_back
@@ -29,18 +35,46 @@ if __name__=="__main__":
         exit()
     csv = str(sys.argv[1])
     df = pd.read_csv(csv)
-
+    
     # df = pd.read_csv('sashimi.csv')
     # df = pd.read_csv('buhin.csv')
     # df = pd.read_csv('buhin_randomized.csv')
     # df = pd.read_csv('buhin2.csv')
     
-    all= df.value.tolist()
-    mean = sum(all)/len(all)
-    N = len(all)
+    alldata= df.value.tolist()
+    mean = sum(alldata)/len(alldata)
+    N = len(alldata)
     
     levels = df.keys().tolist()
     levels.remove('value')
+    
+    # Transform A(A1,A2),B(B1,B2),C(C1,C2),D(D1,D2) to N (N1 to N8)
+    data2 = np.vstack( \
+        (np.array(df[df["A"]==1][df["B"]==1][df["C"]==1][df["D"]==1].value.tolist()),\
+        np.array(df[df["A"]==1][df["B"]==1][df["C"]==2][df["D"]==2].value.tolist()),\
+        np.array(df[df["A"]==1][df["B"]==2][df["C"]==1][df["D"]==2].value.tolist()),\
+        np.array(df[df["A"]==1][df["B"]==2][df["C"]==2][df["D"]==1].value.tolist()),\
+        np.array(df[df["A"]==2][df["B"]==1][df["C"]==1][df["D"]==2].value.tolist()),\
+        np.array(df[df["A"]==2][df["B"]==1][df["C"]==2][df["D"]==1].value.tolist()),\
+        np.array(df[df["A"]==2][df["B"]==2][df["C"]==1][df["D"]==1].value.tolist()),\
+        np.array(df[df["A"]==2][df["B"]==2][df["C"]==2][df["D"]==2].value.tolist()))).transpose()
+    
+    alldata2 = flatten(data2)
+    N2 = len(alldata2)
+    mean2 = sum(alldata2)/N2
+    S_T = sum([(x-mean2)**2 for x in alldata2])
+    
+    (m2,n2) = data2.shape
+    S_temp = [0]*n2
+    for j in range(n2):
+        S_temp[j] = sum(data2[:,j])
+    S_temp_average = sum(S_temp)/len(S_temp)
+    S_N = 0 
+    for j in range(n2):
+        S_N += (sum(data2[:,j])-S_temp_average)**2 / len(data2[:,j])
+    # S_e: 純誤差
+    S_e = S_T - S_N
+    
     # levels = ["A","B","C","D"]
     S = [0]*len(levels)
     s = [0,0]
@@ -61,9 +95,12 @@ if __name__=="__main__":
     S_AB = S[levels.index("AB")] if "AB" in levels else 0
     S_AC = S[levels.index("AC")] if "AC" in levels else 0
     S_BC = S[levels.index("BC")] if "BC" in levels else 0
+    # S_E: 誤差
     S_E = S_T-S_A-S_B-S_C-S_D-S_AB-S_AC-S_BC
+    # S_e_prime: 不適合 
+    S_e_prime = S_E - S_e 
     
-     # Degree of freedom
+    # Degree of freedom
     fT = N-1
     fA = 2-1
     fB = 2-1
@@ -72,7 +109,9 @@ if __name__=="__main__":
     fAB = 2-1
     fAC = 2-1
     fBC = 2-1
-    fe = fT - len(levels) 
+    fN = 8-1
+    fe = fT - fN
+    fe_prime = 2-1
     
     if S_E==0:
         # Run pooling
@@ -90,6 +129,8 @@ if __name__=="__main__":
     V_AB = S_AB/fAB
     V_AC = S_AC/fAC
     V_BC = S_BC/fBC
+    V_e = S_e / fe
+    V_e_prime = S_e_prime / fe_prime
     
     # Variance ratio
     F_A = V_A/V_E 
@@ -99,6 +140,7 @@ if __name__=="__main__":
     F_AB = V_AB/V_E
     F_AC = V_AC/V_E
     F_BC = V_AC/V_E
+    F_e_prime = V_e_prime / V_e
     
     p_A = 1-scipy.stats.f.cdf(F_A,fA,fe)
     p_B = 1-scipy.stats.f.cdf(F_B,fB,fe)
@@ -107,6 +149,7 @@ if __name__=="__main__":
     p_AB = 1-scipy.stats.f.cdf(F_AB,fAB,fe)
     p_AC = 1-scipy.stats.f.cdf(F_AC,fAC,fe)
     p_BC = 1-scipy.stats.f.cdf(F_BC,fBC,fe)
+    p_e_prime = 1-scipy.stats.f.cdf(F_e_prime,fe_prime,fe)
     
     # prinfo(pA, pB, pC, pD)
     
@@ -121,4 +164,6 @@ if __name__=="__main__":
         report_result(p_AC,"AC")
     if "BC" in levels:
         report_result(p_BC,"BC")
+    report_result(p_e_prime,"e_prime")
     
+    # prinfo(F_A, F_B, F_C, F_D, F_AB, F_AC, F_e_prime)
