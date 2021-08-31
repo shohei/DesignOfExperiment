@@ -78,8 +78,8 @@ def one_way_anova(df):
         if F_A > scipy.stats.f.isf(0.01, f_A, f_E):
            print(colored("Significant difference among A (p=0.01)","red"))
         else:
-           print("Significant difference among A (p=0.05)")
-        multiple_comparison_bonferroni(data, V_E, pvalue=0.05)
+           print(colored("Significant difference among A (p=0.05)","red"))
+        multiple_comparison_bonferroni(data, V_E)
     else:
            print("No significant difference among A")
 
@@ -279,16 +279,16 @@ def check_homoscedasticity_two_way(df, pvalue):
     valueB = [df[df["B"]==i].value.tolist() for i in range(1,nB+1)]
     isHomoscedasticity = True
     if scipy.stats.bartlett(*valueA).pvalue < pvalue:
-        print(colored("The cateogry A doesn't comply with the homoscedasticity.","yellow"))
-        print("Thus the multiple comparison test cannot be applied.")
-        print("Apply 1) Non-parametric test, 2) Kruskal-Wallis test,")
-        print("and finally 3) Non-parametric multiple comparison test.")
+        print(colored("The cateogry A doesn't comply with the homoscedasticity,","yellow"))
+        print(colored("and the multiple comparison test is not appropriate.","yellow"))
+        print(colored("Apply 1) Non-parametric test, 2) Kruskal-Wallis test,","yellow"))
+        print(colored("and finally 3) Non-parametric multiple comparison test.","yellow"))
         isHomoscedasticity = False
     if scipy.stats.bartlett(*valueB).pvalue < pvalue:
-        print(colored("The category B doesn't comply with the homoscedasticity.","yellow"))
-        print("Thus the multiple comparison test cannot be applied.")
-        print("Apply 1) Non-parametric test, 2) Kruskal-Wallis test,")
-        print("and finally 3) Non-parametric multiple comparison test.")
+        print(colored("The category B doesn't comply with the homoscedasticity,","yellow"))
+        print(colored("and the multiple comparison test is not appropriate.","yellow"))
+        print(colored("Apply 1) Non-parametric test, 2) Kruskal-Wallis test,","yellow"))
+        print(colored("and finally 3) Non-parametric multiple comparison test.","yellow"))
         isHomoscedasticity = False
     return isHomoscedasticity
 
@@ -299,18 +299,15 @@ if __name__=="__main__":
     csv = str(sys.argv[1])
     df = pd.read_csv(csv)
 
+    check_normality(df, pvalue=0.05) 
     if "B" in df.keys():
         # Two way ANOVA
         print("Running two-way ANOVA")
-        if not check_normality(df, pvalue=0.05) \
-           or not check_homoscedasticity_two_way(df, pvalue=0.05):
-            exit()
+        check_homoscedasticity_two_way(df, pvalue=0.05)
         two_way_anova(df)
     else:
         # One way ANOVA
         print("Running one-way ANOVA")
-        if not check_normality(df, pvalue=0.05) \
-           or not check_homoscedasticity_one_way(df, pvalue=0.05):
-            exit()
+        check_homoscedasticity_one_way(df, pvalue=0.05)
         one_way_anova(df)
 
