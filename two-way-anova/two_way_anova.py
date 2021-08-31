@@ -19,8 +19,67 @@ def prinfo(*args):
     for i,(var,val) in enumerate(zip(vnames, args)):
         print(f"{var} = {val}")
 
-def two_way_anova(csv):
-    df = pd.read_csv(csv)
+def one_way_anova(df):
+    nA = max(df["A"])
+    data = []
+    for i in range(nA):
+        data.append(([]))
+    
+    for i in range(nA):
+        _df = df[df["A"]==(i+1)]
+        data[i] = _df.value.tolist()
+        if len(data[i])==0:
+            print("Cannot run ANOVA since no data found for A{},B{}",i+1,j+1)
+            exit()
+
+    flatten_data = flatten(data)
+    N = len(flatten_data)
+    mu = sum(flatten_data)/N
+    
+    # S: Total sum of squares of deviation
+    S = 0
+    for i in range(nA):
+        d = data[i]
+        for v in d:
+            S += (v-mu)**2
+    
+    # S_A: Sum of squares of deviation for factor A
+    S_A = 0
+    for i in range(nA):
+        d = data[i]
+        n_a = len(d)
+        mean_a = sum(d)/n_a
+        S_A += n_a * (mean_a-mu)**2
+
+    # S_E: Sum of squares of deviation for erros
+    S_E = S - S_A 
+
+    # Degree of freedom
+    f = N-1
+    f_A = nA - 1
+    f_E = N - nA
+
+    # Invariant variance
+    V_A = S_A / f_A
+    V_E =  S_E / f_E
+    
+    # Ratio of variances
+    F_A = V_A/V_E
+
+    # Caluculation of F distribution
+    print("********************************")
+    print("Result of ANOVA:",csv)
+    print("********************************")
+
+    if F_A > scipy.stats.f.isf(0.05, f_A, f_E):
+        if F_A > scipy.stats.f.isf(0.01, f_A, f_E):
+           print("Significant difference among A (p=0.01)")
+        else:
+           print("Significant difference among A (p=0.05)")
+    else:
+           print("No significant difference among A")
+
+def two_way_anova(df):
     nA = max(df["A"])
     nB = max(df["B"])
     data = []
@@ -154,4 +213,10 @@ if __name__=="__main__":
         print("Usage: $ python two_way_anova.py <CSV_FILE.csv>")
         exit()
     csv = str(sys.argv[1])
-    two_way_anova(csv)
+    df = pd.read_csv(csv)
+    if "B" in df.keys():
+        two_way_anova(df)
+    else:
+        one_way_anova(df)
+
+
