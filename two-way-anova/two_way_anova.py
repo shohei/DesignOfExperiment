@@ -10,7 +10,6 @@ def flatten(t):
     return [item for sublist in t for item in sublist]
 
 if __name__=="__main__":
-
     if len(sys.argv)!=2:
         print("Usage: $ python two_way_anova.py <CSV_FILE.csv>")
         exit()
@@ -118,8 +117,13 @@ if __name__=="__main__":
     else:
            print("No significant difference among interaction AxB")
    
-    #print(S, S_A, S_B, S_AB, S_E)
-    #print(f,f_A,f_B,f_AB,f_E) 
-    #print(V_A,V_B,V_AB,V_E)
-    #print(F_A,F_B,F_AB)
+    print(S, S_A, S_B, S_AB, S_E)
+    print(f,f_A,f_B,f_AB,f_E) 
+    print(V_A,V_B,V_AB,V_E)
+    print(F_A,F_B,F_AB)
+
+
+
+
+
 
