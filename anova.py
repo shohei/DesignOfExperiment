@@ -178,13 +178,13 @@ def two_way_anova(df):
     print("Result of ANOVA:",csv)
     print("********************************")
 
-    isSignificant = False 
     if F_A > scipy.stats.f.isf(0.05, f_A, f_E):
         if F_A > scipy.stats.f.isf(0.01, f_A, f_E):
            print("Significant difference among A (p=0.01)")
         else:
            print("Significant difference among A (p=0.05)")
-        isSignificant = True 
+        data_A = [flatten(data[i,:]) for i in range(nA)]
+        multiple_comparison_bonferroni(data_A, V_E, 0.05, label="A")
     else:
            print("No significant difference among A")
     
@@ -193,7 +193,8 @@ def two_way_anova(df):
            print("Significant difference among B (p=0.01)")
         else:
            print("Significant difference among B (p=0.05)")
-        isSignificant = True 
+        data_B = [flatten(data[:,j]) for j in range(nB)]
+        multiple_comparison_bonferroni(data_B, V_E, 0.05, label="B")
     else:
            print("No significant difference among B")
 
@@ -208,16 +209,13 @@ def two_way_anova(df):
         else:
                print("No significant difference among interaction AxB")
    
-    if isSignificant:
-        multiple_comparison_bonferroni_two_way(data, V_E, 0.05)
-
     #prinfo(N, nA, nB)
     #prinfo(S, S_A, S_B, S_AB, S_E)
     #prinfo(f, f_A, f_B, f_AB, f_E) 
     #prinfo(V_A, V_B, V_AB, V_E)
     #prinfo(F_A, F_B, F_AB)
 
-def multiple_comparison_bonferroni(data, V_E, pvalue):
+def multiple_comparison_bonferroni(data, V_E, pvalue, label="A"):
     nA = len(data)
     flatten_data = flatten(data)
     N = len(flatten_data)
@@ -240,9 +238,9 @@ def multiple_comparison_bonferroni(data, V_E, pvalue):
         n_v = len(data[v])
         T[i] = abs(means[u]-means[v])/math.sqrt(V_E*(1/n_u+1/n_v))
         if T[i] < T0:
-            print(" A{} and A{} don't have a significant difference.".format(u+1,v+1))
+            print(" {}{} and {}{} don't have a significant difference.".format(label,u+1,label,v+1))
         else:
-            print(" A{} and A{} have a significant difference.".format(u+1,v+1))
+            print(" {}{} and {}{} have a significant difference.".format(label,u+1,label,v+1))
 
 def multiple_comparison_bonferroni_two_way(data, V_E, pvalue):
     nA = data.shape[0] 
@@ -290,7 +288,7 @@ def multiple_comparison_bonferroni_two_way(data, V_E, pvalue):
     T_B = [[]]*len(combi_B)
     for i,(u,v) in enumerate(combi_B):
         T_B[i] = abs(means_B[u]-means_B[v])/math.sqrt(V_E*(1/number_B[u]+1/number_B[v]))
-        if T_A[i] < T0_A:
+        if T_B[i] < T0_B:
             print(" B{} and B{} don't have a significant difference.".format(u+1,v+1))
         else:
             print(" B{} and B{} have a significant difference.".format(u+1,v+1))
