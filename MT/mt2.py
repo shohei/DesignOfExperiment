@@ -58,8 +58,10 @@ def mahalanobis(df, labels=[1,2,3,4,5,6]):
 
 if __name__=="__main__":
     df = pd.read_csv('health.csv')
-    labels = [[1,2,3,4,5,6],[1,2,3],[1,4,5],[1,6],[2,4],[2,5],[3,4],[3,5,6]]
+    labels = [[1,2,3,4,5,6],[1,2,3],[1,4,5],[1,6],[2,4,6],[2,5],[3,4],[3,5,6]]
     N = len(labels) #8
+
+    # Calculate Mahalanobis distance
     M_N = [0]*N
     for i in range(N):
         _, M_N[i] = mahalanobis(df, labels[i])
@@ -72,7 +74,22 @@ if __name__=="__main__":
         sumD = sum([1/m for m in M_N[i]])
         SN[i] = -10*math.log10(1/N_labels*sumD)
 
-    print(SN)
+    SN_labels = [[1,2,3,4],[1,2,5,6],[1,2,7,8],[1,3,5,7],[1,3,6,8],[1,4,5,8]]
+    SN_difference = [0]*6
+    for i in range(6): # 6 is for x1,x2,x3,x4,x5,x6
+        SN_use = []
+        SN_no_use = [] 
+        for j in range(N): 
+            if (j+1) in SN_labels[i]:
+                SN_use.append(SN[j])
+            else:
+                SN_no_use.append(SN[j])
+        SN_use_average = sum(SN_use)/len(SN_use)
+        SN_no_use_average = sum(SN_no_use)/len(SN_no_use)
+        SN_difference[i] = SN_use_average-SN_no_use_average
+
+    print(SN_difference)
+
 
 
 
