@@ -54,7 +54,7 @@ def mahalanobis(df, labels=[1,2,3,4,5,6]):
         xm_N[i] = xm_N_temp[1:]
         M_N[i] = (xm_N[i].transpose() @ V @ xm_N[i]) / N #評価項目数Nで割る
 
-    return (M_Y, M_N)    
+    return (M_Y, M_N, V)    
 
 if __name__=="__main__":
     df = pd.read_csv('health.csv')
@@ -64,7 +64,7 @@ if __name__=="__main__":
     # Calculate Mahalanobis distance
     M_N = [0]*N
     for i in range(N):
-        _, M_N[i] = mahalanobis(df, labels[i])
+        _, M_N[i], _ = mahalanobis(df, labels[i])
         print(M_N[i])
 
     # Calculate SN ratio
@@ -108,11 +108,12 @@ if __name__=="__main__":
         selected_labels.append(int(feature_name.replace('x','')))
 
     # Recalculate Mahalanobis distance
-    M_Y_selected, M_N_selected = mahalanobis(df, selected_labels)
+    M_Y_selected, M_N_selected, V_selected = mahalanobis(df, selected_labels)
+    maximum_mahalanobis = max(M_Y_selected)
     print(M_Y_selected)
 
-
-
+    df_test = pd.read_csv('health_test.csv')
+    pdb.set_trace()
 
 
 
