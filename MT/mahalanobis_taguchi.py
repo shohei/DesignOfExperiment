@@ -54,7 +54,46 @@ def mahalanobis(df, labels=[1,2,3,4,5,6]):
         xm_N[i] = xm_N_temp[1:]
         M_N[i] = (xm_N[i].transpose() @ V @ xm_N[i]) / N #評価項目数Nで割る
 
-    return (M_Y, M_N, V)    
+    return (M_Y, M_N)    
+
+def predict_mahalanobis(df, labels, df_test):
+    N = len(labels)
+    x_Y = [[]]*N
+    for i in range(N):
+        x_Y[i] = df[df.healthy=='Y']["x"+str(labels[i])]
+    
+    x_Y_base = [[]]*N
+    for i in range(N):
+        x_Y_base[i] = (x_Y[i]-x_Y[i].mean())/x_Y[i].std(ddof=0)
+    
+    x_test = [[]]*N
+    for i in range(N):
+        x_test[i] = df_test["x"+str(labels[i])]
+
+    x_test_base = [[]]*N
+    for i in range(N):
+        x_test_base[i] = (x_test[i]-x_Y[i].mean())/x_Y[i].std(ddof=0)
+
+    hash = {}
+    for i in range(N):
+        hash['x'+str(labels[i])] = x_Y_base[i]
+
+    x_Y_base = pd.DataFrame(hash)
+    S = np.cov(x_Y_base,rowvar=0,bias=True)
+    V = np.linalg.inv(S)
+    
+    N_sample_test = len(x_test[0])
+    M_test = [0]*N_sample_test
+    xm_test = [0]*N_sample_test
+    for i in range(N_sample_test):
+        xm_test_temp = 0
+        for j in range(N):
+            x_test_base_j = x_test_base[j]
+            xm_test_temp = np.vstack((xm_test_temp,x_test_base_j.tolist()[i]))
+        xm_test[i] = xm_test_temp[1:]
+
+        M_test[i] = (xm_test[i].transpose() @ V @ xm_test[i]) / N #評価項目数Nで割る
+    return M_test  
 
 if __name__=="__main__":
     df = pd.read_csv('health.csv')
@@ -64,7 +103,7 @@ if __name__=="__main__":
     # Calculate Mahalanobis distance
     M_N = [0]*N
     for i in range(N):
-        _, M_N[i], _ = mahalanobis(df, labels[i])
+        _, M_N[i] = mahalanobis(df, labels[i])
         print(M_N[i])
 
     # Calculate SN ratio
@@ -108,12 +147,21 @@ if __name__=="__main__":
         selected_labels.append(int(feature_name.replace('x','')))
 
     # Recalculate Mahalanobis distance
-    M_Y_selected, M_N_selected, V_selected = mahalanobis(df, selected_labels)
+    M_Y_selected, M_N_selected = mahalanobis(df, selected_labels)
     maximum_mahalanobis = max(M_Y_selected)
     print(M_Y_selected)
 
+    # Predict mahalanobis distance for new data set
     df_test = pd.read_csv('health_test.csv')
-    pdb.set_trace()
+    M_test = predict_mahalanobis(df, selected_labels, df_test)
 
-
+    print("**************************")
+    print("Mahalanobis-Taguchi method")
+    print("**************************")
+    for i, row in df_test.iterrows(): 
+        name = row['name']
+        if M_test[i] > maximum_mahalanobis:
+            print("{} is not healthy".format(name))
+        else:
+            print("{} is healthy".format(name))
 
