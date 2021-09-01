@@ -22,4 +22,4 @@ mn_H = (x_H - x_mean_H).transpose() @ np.linalg.inv(covmat_team2) @ (x_H - x_mea
 
 print('mahalanobis distance A:',float(mn_A))
 print('mahalanobis distance H:',float(mn_H))
-
+pdb.set_trace()
