@@ -90,6 +90,25 @@ if __name__=="__main__":
 
     print(SN_difference)
 
+    SN_difference_with_feature =[[]]*6
+    for i in range(6):
+        SN_difference_with_feature[i] = (SN_difference[i],'x'+str(i+1))
+
+    # Sort by value
+    SN_difference_with_feature = list(reversed(sorted(SN_difference_with_feature)))
+
+    SN_difference_with_feature_selected = []
+    for i in range(6):
+        if SN_difference_with_feature[i][0] > 0:
+            SN_difference_with_feature_selected.append(SN_difference_with_feature[i])
+
+    df_new = pd.DataFrame()
+    for i in range(len(SN_difference_with_feature_selected)):
+        feature_name = SN_difference_with_feature_selected[i][1]
+        df_new = pd.concat((df_new,df[feature_name]),axis=1)
+
+    print(df_new)
+
 
 
 
