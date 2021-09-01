@@ -102,18 +102,12 @@ if __name__=="__main__":
         if SN_difference_with_feature[i][0] > 0:
             SN_difference_with_feature_selected.append(SN_difference_with_feature[i])
 
-    # df_new = pd.DataFrame()
     selected_labels = []
     for i in range(len(SN_difference_with_feature_selected)):
         feature_name = SN_difference_with_feature_selected[i][1]
-
-        # df_new = pd.concat((df_new,df[feature_name]),axis=1)
         selected_labels.append(int(feature_name.replace('x','')))
 
-    # print(df_new)
     # Recalculate Mahalanobis distance
-    # selected_labels = [6,1,5,3]
-    # M_Y_selected, M_N_selected = mahalanobis(df, [6,1,5,3])
     M_Y_selected, M_N_selected = mahalanobis(df, selected_labels)
     print(M_Y_selected)
 
