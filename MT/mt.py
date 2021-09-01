@@ -60,5 +60,5 @@ for i in range(len(x1_N)):
         x6_N_base.tolist()[i]))
     M_N[i] = (xm_N[i].transpose() @ V @ xm_N[i]) / 6 #評価項目数6で割る
 
-pdb.set_trace()
+
 
