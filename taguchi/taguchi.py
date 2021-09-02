@@ -129,3 +129,6 @@ print('**********************')
 print('Optimal solution')
 print('**********************')
 print(df_complete.iloc[0])
+
+
+input("Press Enter to exit.")
