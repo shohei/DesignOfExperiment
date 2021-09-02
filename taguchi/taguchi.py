@@ -3,6 +3,8 @@ import numpy as np
 import pdb
 import math
 import matplotlib.pyplot as plt
+from sklearn import linear_model
+from itertools import product
 
 df = pd.read_csv('magcup.csv')
 
@@ -68,6 +70,7 @@ plt.figure(1)
 plt.title("SN ratio")
 plt.figure(2)
 plt.title("Mean evaluation")
+
 # 要因効果図の描画
 for i in range(N_w):
     sn_a = sn_mean_a[i]
@@ -104,9 +107,25 @@ for i in range(N_w):
     yl = axes.get_ylim()[0]
     plt.text(x_a[i], yl, 'w'+str(i+1), fontsize=12)
 
-plt.show()
+plt.show(block=False)
 
 # パラメータの最適化(重回帰分析)
+model = linear_model.LinearRegression()
+Y = df_error.mean(axis=1)
+X = df_control
+model.fit(X,Y)
+print(model.coef_)
+print(model.intercept_)
 
-
-
+# combi = [p for p in product((0,1),(0,1),(0,1),(0,1),(0,1),(0,1))]
+patterns = list(product((0,1),(0,1),(0,1),(0,1),(0,1),(0,1)))
+x = np.array(patterns)
+y = model.predict(x)
+y = y.reshape(len(y),1)
+complete = np.hstack((x,y))
+df_complete = pd.DataFrame(complete,columns=('X1','X2','X3','X4','X5','X6','Y'))
+df_complete = df_complete.sort_values(by=['Y'],ascending=False)
+print('**********************')
+print('Optimal solution')
+print('**********************')
+print(df_complete.iloc[0])
