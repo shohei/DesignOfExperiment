@@ -81,3 +81,7 @@ Name: 47, dtype: float64
 ```
 ![](image/sn.png)
 ![](image/eval.png)
+
+# 参考文献
+例題とExcel演習で学ぶ 実験計画法とタグチメソッド
+https://www.amazon.co.jp/dp/4274219666
