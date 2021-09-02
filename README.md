@@ -1,7 +1,8 @@
 # 実験計画法とタグチメソッド
 
 ## /anova
-1元配置法および2元配置法による分散分析
+1元配置法および2元配置法による分散分析（多重比較法による水準内の検定も実装）
+
 
 ```
 $ python anova.py washing_two.csv
@@ -22,9 +23,9 @@ No significant difference among interaction AxB
 
 
 ## /orthogonal_table
-直行表を用いた
+直交表を用いた実験計画法による分析。（多重比較法による水準内の検定も実装）
 
-### 繰り返しのない直行表-実験計画法
+### 繰り返しのない直交表-実験計画法
 ```
 $ python orthogonal.py buhin2.csv
 There is no significant effect by A.
@@ -33,7 +34,7 @@ There is no significant effect by C.
 There is no significant effect by D.
 There is a significant effect by AB (p=0.05).
 ```
-### 繰り返しのある直行表-実験計画法（完全無作為法）（cf. 乱塊法）
+### 繰り返しのある直交表-実験計画法（完全無作為法）（cf. 乱塊法）
 ```
 $ python orthogonal_repetition.py poster_repetition.csv
 There is a significant effect by A (p=0.01).
