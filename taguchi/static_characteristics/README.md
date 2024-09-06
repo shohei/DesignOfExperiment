@@ -20,3 +20,7 @@
 2. 制御因子は２水準、すなわち0と1から成る。
 
 3. SN比の計算には望目特性(nominal-the-better)を用いる。望大特性(larger-the-better)、望小特性(smaller-the-better)は非推奨のため用いない（田口氏の意向、および日本では非推奨）。
+
+![](image/sn.png)
+
+![](image/mean.png)

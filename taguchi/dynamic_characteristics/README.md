@@ -31,3 +31,8 @@
 
 2. 制御因子は3水準、すなわち1と2と3から成る。
 
+![](image/sn.png)
+![](image/sensitivity.png)
+
+
+
