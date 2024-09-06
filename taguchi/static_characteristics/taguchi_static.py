@@ -12,8 +12,8 @@ n = 10 # This is the assumed sampling number
 # wは制御因子, xは誤差因子
 x_labels = [c for c in df.columns if 'x' in c]
 w_labels = [c for c in df.columns if 'w' in c]
-df_error = df[x_labels]
-df_control = df[w_labels]
+df_control = df[x_labels]
+df_error = df[w_labels]
 N = len(df) # 8
 N_x = len(x_labels)
 N_w = len(w_labels)
@@ -29,14 +29,14 @@ for i, row in df_error.iterrows():
     #参考: https://seinzumtode.hatenadiary.jp/entry/2024/09/06/152834
 
 # 改善すべき因子の抽出 (第一段階: SN比を利用)
-SN_mean_difference = [0]*N_w
-sn_mean_a = [0]*N_w
-sn_mean_b = [0]*N_w
-for i in range(N_w):
-    w = w_labels[i]
-    df_w = df_control[w]
+SN_mean_difference = [0]*N_x
+sn_mean_a = [0]*N_x
+sn_mean_b = [0]*N_x
+for i in range(N_x):
+    x = x_labels[i]
+    df_x = df_control[x]
     for j, sn in enumerate(SN):
-        if df_w[j]==1:
+        if df_x[j]==1:
             sn_mean_a[i] += SN[j]
         else:
             sn_mean_b[i] += SN[j]
@@ -46,14 +46,14 @@ for i in range(N_w):
     
 # 目標値のあわせこみ(第二段階: 平均値を利用)
 Mean = df_error.mean(axis=1).tolist()
-Mean_mean_difference = [0]*N_w
-mean_mean_a = [0]*N_w
-mean_mean_b = [0]*N_w
-for i in range(N_w):
-    w = w_labels[i]
-    df_w = df_control[w]
+Mean_mean_difference = [0]*N_x
+mean_mean_a = [0]*N_x
+mean_mean_b = [0]*N_x
+for i in range(N_x):
+    x = x_labels[i]
+    df_x = df_control[x]
     for j, sn in enumerate(Mean):
-        if df_w[j]==1:
+        if df_x[j]==1:
             mean_mean_a[i] += Mean[j]
         else:
             mean_mean_b[i] += Mean[j]
@@ -68,7 +68,7 @@ width = 50
 x_a = [initial_x]
 x_b = [initial_x+width]
 # x座標生成
-for i in range(N_w):
+for i in range(N_x):
     x_a.append(x_a[-1]+offset)
     x_b.append(x_b[-1]+offset)
 
@@ -78,7 +78,7 @@ plt.figure(2)
 plt.title("Mean evaluation")
 
 # 要因効果図の描画
-for i in range(N_w):
+for i in range(N_x):
     sn_a = sn_mean_a[i]
     sn_b = sn_mean_b[i]
     plt.figure(1)
@@ -102,16 +102,16 @@ plt.figure(2)
 plt.plot((x_a[0],x_b[-1]),(mean_average,mean_average),'k--')
 
 # ラベルの描画
-for i in range(N_w):
+for i in range(N_x):
     plt.figure(1)
     axes = plt.gca()
     yl = axes.get_ylim()[0]
-    plt.text(x_a[i], yl, 'w'+str(i+1), fontsize=12)
+    plt.text(x_a[i], yl, 'x'+str(i+1), fontsize=12)
 
     plt.figure(2)
     axes = plt.gca()
     yl = axes.get_ylim()[0]
-    plt.text(x_a[i], yl, 'w'+str(i+1), fontsize=12)
+    plt.text(x_a[i], yl, 'x'+str(i+1), fontsize=12)
 
 plt.show(block=False)
 
