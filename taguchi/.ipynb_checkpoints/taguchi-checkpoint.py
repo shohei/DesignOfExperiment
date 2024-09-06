@@ -20,13 +20,7 @@ N_w = len(w_labels)
 
 SN = [0]*N
 for i, row in df_error.iterrows():
-    #望目特性のSN比の公式
     SN[i] = 10*math.log10(row.mean()**2/row.var()-1/n)
-    #望大特性のSN比の公式(非推奨)
-    #SN[i] = -10*math.log10(1/n*sum([1/x**2 for x in row]))
-    #望大特性・望小特性の計算式は分母に分散（ばらつき）の情報が入っていないので、
-    #1段階目のパラメータ選択に使うSN比としての意義がないかもしれない。　
-    #参考: https://seinzumtode.hatenadiary.jp/entry/2024/09/06/152834
 
 # 改善すべき因子の抽出 (第一段階: SN比を利用)
 SN_mean_difference = [0]*N_w
